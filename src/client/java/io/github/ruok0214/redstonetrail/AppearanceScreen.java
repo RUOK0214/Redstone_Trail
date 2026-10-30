@@ -11,6 +11,7 @@ import java.util.UUID;
 /** Apply changes to either the live trail or one saved comparison; Cancel leaves both untouched. */
 public final class AppearanceScreen extends TrailPanel {
     private final UUID savedId;
+    private final boolean temporary;
     private final SettingSlider[] channels = new SettingSlider[3];
     private float lineWidth;
     private int color, transparency;
@@ -19,11 +20,14 @@ public final class AppearanceScreen extends TrailPanel {
     private Button apply;
     private boolean syncing;
     AppearanceScreen(Screen parent, TrailManager manager, UUID savedId) {
-        super("appearance", parent, manager); this.savedId = savedId;
-        var style = savedId == null ? book.style() : book.saved(savedId).style();
+        this(parent, manager, savedId, false);
+    }
+    AppearanceScreen(Screen parent, TrailManager manager, UUID savedId, boolean temporary) {
+        super(temporary ? "temporary_appearance" : "appearance", parent, manager); this.savedId = savedId; this.temporary = temporary;
+        var style = temporary ? book.temporaryStyle() : savedId == null ? book.style() : book.saved(savedId).style();
         color = style.color(); lineWidth = style.width(); transparency = style.transparency();
         hexText = String.format(Locale.ROOT, "#%06X", color);
-        nameText = savedId == null ? tr("current").getString() : book.saved(savedId).name();
+        nameText = temporary ? tr("temporary").getString() : savedId == null ? tr("current").getString() : book.saved(savedId).name();
     }
     @Override protected void init() {
         layout(380, 232);
@@ -52,7 +56,8 @@ public final class AppearanceScreen extends TrailPanel {
         apply = button(tr("apply"), 10, 206, half, () -> {
             if (!validHex() || nameText.isBlank() || manager.book() != book) return;
             var style = new TrailBook.Style(color, transparency, lineWidth);
-            if (savedId == null) book.setStyle(style); else book.editSaved(savedId, nameText, style);
+            if (temporary) book.setTemporaryStyle(style);
+            else if (savedId == null) book.setStyle(style); else book.editSaved(savedId, nameText, style);
             manager.save(); onClose();
         });
         button(Component.translatable("gui.cancel"), 16 + half, 206, half, this::onClose);

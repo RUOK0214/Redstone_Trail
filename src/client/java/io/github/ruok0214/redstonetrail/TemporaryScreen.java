@@ -7,19 +7,18 @@ import net.minecraft.network.chat.Component;
 import java.util.Locale;
 
 public final class TemporaryScreen extends TrailPanel {
-    private boolean enabled;
     private double seconds, fadeSeconds;
     private TrailBook.Fade fade;
     private SettingSlider tail;
     TemporaryScreen(Screen parent, TrailManager manager) {
         super("temporary_title", parent, manager);
-        var settings = book.temporary(); enabled = settings.enabled(); seconds = settings.seconds(); fade = settings.fade(); fadeSeconds = settings.fadeSeconds();
+        var settings = book.temporary(); seconds = settings.seconds(); fade = settings.fade(); fadeSeconds = settings.fadeSeconds();
     }
     @Override protected void init() {
         layout(400, 232);
         int inner = panelWidth - 20, half = (inner - 6) / 2;
-        addRenderableWidget(Button.builder(modeLabel(), b -> { enabled = !enabled; b.setMessage(modeLabel()); })
-                .bounds(left + 10, top + 28, inner, 20).build());
+        button(tr("temporary_appearance"), 10, 28, inner,
+                () -> minecraft.gui.setScreen(new AppearanceScreen(this, manager, null, true))).active = manager.canRecord();
         addRenderableWidget(new SettingSlider(left + 10, top + 54, inner, .5, 120, .5, seconds,
                 value -> tr("lifetime", String.format(Locale.ROOT, "%.1f", value)), value -> seconds = value));
         addRenderableWidget(Button.builder(fadeLabel(), b -> {
@@ -31,11 +30,10 @@ public final class TemporaryScreen extends TrailPanel {
         tail.active = fade == TrailBook.Fade.AFTER_DURATION;
         button(tr("apply"), 10, 206, half, () -> {
             if (manager.book() != book || !manager.canRecord()) return;
-            book.configureTemporary(new TrailBook.Temporary(enabled, seconds, fade, fadeSeconds)); manager.save(); onClose();
+            book.configureTemporary(new TrailBook.Temporary(book.temporary().enabled(), seconds, fade, fadeSeconds)); manager.save(); onClose();
         }).active = manager.canRecord();
         button(Component.translatable("gui.cancel"), 16 + half, 206, half, this::onClose);
     }
-    private Component modeLabel() { return tr("mode", tr(enabled ? "temporary" : "persistent")); }
     private Component fadeLabel() { return tr("fade." + fade.name().toLowerCase(Locale.ROOT)); }
     @Override public void extractRenderState(GuiGraphicsExtractor g, int x, int y, float delta) {
         super.extractRenderState(g, x, y, delta);

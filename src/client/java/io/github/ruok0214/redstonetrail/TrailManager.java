@@ -45,11 +45,12 @@ public final class TrailManager {
         ticks++;
         if (level != mc.level) {
             if (book() != null) book().stop();
-            if (book() != null && book().temporary().enabled()) book().clear();
+            if (book() != null) book().clearTemporary();
             save(); knownStates.clear(); level = mc.level;
             session = level == null ? null : sessions.computeIfAbsent(identity(mc), Session::new);
         }
         if (book() != null) {
+            book().setTemporaryCenter(mc.player == null ? null : target(mc.player.blockPosition()));
             book().expire();
             // Once visible state agrees with the server baseline, the world itself is a safe baseline.
             // Keep only unresolved predictions; temporary trails can otherwise grow this cache forever.
@@ -61,16 +62,26 @@ public final class TrailManager {
         Minecraft mc = Minecraft.getInstance();
         tick(mc);
         if (!canRecord() || mc.player == null || level == null || book().recording()) return;
-        knownStates.clear(); book().start(target(mc.player.blockPosition()));
+        if (!book().temporary().enabled()) knownStates.clear();
+        book().start(target(mc.player.blockPosition()));
         message("started");
     }
     public void stop() {
         if (book() == null) return;
-        book().stop(); knownStates.clear(); save(); message(book().temporary().enabled() ? "stopped_temporary" : "stopped");
+        book().stop(); if (!book().temporary().enabled()) knownStates.clear(); save(); message("stopped");
     }
     public void clear() {
         if (book() == null || session.readFailed) return;
-        book().clear(); knownStates.clear(); save();
+        book().clear(); if (!book().temporary().enabled()) knownStates.clear(); save();
+    }
+    public void setTemporaryEnabled(boolean enabled) {
+        if (!canRecord()) return;
+        var settings = book().temporary();
+        book().configureTemporary(new TrailBook.Temporary(enabled, settings.seconds(), settings.fade(), settings.fadeSeconds()));
+        var mc = Minecraft.getInstance();
+        book().setTemporaryCenter(mc.player == null ? null : target(mc.player.blockPosition()));
+        if (!enabled && !book().recording()) knownStates.clear();
+        save();
     }
     /** Only seed the old state here; predicted local changes never create marks. */
     public void beforePrediction(ClientLevel source, BlockPos position) {
@@ -87,9 +98,13 @@ public final class TrailManager {
         if (!observing(source, position)) return;
         var previous = knownStates.getOrDefault(position, source.getBlockState(position));
         if (previous == next) return;
-        boolean added = book().changed(target(position));
-        if (added) knownStates.put(position.immutable(), next);
-        if (book().limitReached()) { knownStates.clear(); save(); message("limit"); }
+        boolean wasRecording = book().recording();
+        book().changed(target(position));
+        if (knownStates.containsKey(position)) knownStates.put(position.immutable(), next);
+        if (wasRecording && book().limitReached()) {
+            if (!book().temporary().enabled()) knownStates.clear();
+            save(); message("limit");
+        }
     }
     public void unloaded(ClientLevel source, int x, int z) {
         if (source == level) knownStates.keySet().removeIf(pos -> pos.getX() >> 4 == x && pos.getZ() >> 4 == z);

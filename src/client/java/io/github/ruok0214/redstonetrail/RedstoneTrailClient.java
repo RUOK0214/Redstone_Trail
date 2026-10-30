@@ -61,7 +61,9 @@ public final class RedstoneTrailClient implements ClientModInitializer {
         if (mc.level == null || mc.player == null || book == null || mc.gui.hud.isHidden()) return List.of();
         List<Outline> result = new ArrayList<>();
         if (book.visible()) for (var mark : book.marks())
-            addOutline(result, mc, mark, book.style(), book.opacity(mark), .004, book.throughWalls());
+            addOutline(result, mc, mark, book.style(), 1, .004, book.throughWalls());
+        if (book.temporary().enabled()) for (var mark : book.temporaryMarks())
+            addOutline(result, mc, mark, book.temporaryStyle(), book.opacity(mark), .042, book.throughWalls());
         int layer = 1;
         for (var saved : book.saved()) {
             // Slightly separated bounds keep overlapping comparison colors distinguishable.

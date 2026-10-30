@@ -67,7 +67,7 @@ public final class TrailClientGameTest implements FabricClientGameTest {
         context.clickScreenButton("gui.cancel");
         context.clickScreenButton("redstone_trail.appearance"); color(context, "#FF44BB"); context.clickScreenButton("redstone_trail.apply");
         snapshot(context, "회로 B");
-        context.clickScreenButton(label(context, "현재 경로:"));
+        context.clickScreenButton(label(context, "계속 유지:"));
         context.runOnClient(mc -> {
             var outlines = RedstoneTrailClient.extractOutlines();
             check(outlines.size() == 4 && outlines.stream().map(o -> o.color() & 0xFFFFFF).distinct().count() == 2, "Two independently colored snapshots show together while current trail is hidden");
@@ -98,37 +98,80 @@ public final class TrailClientGameTest implements FabricClientGameTest {
         firstButton(context, "delete"); context.waitForScreen(ConfirmScreen.class); context.clickScreenButton("gui.yes");
         context.runOnClient(mc -> check(RedstoneTrailClient.manager.book().saved().size() == 1 && RedstoneTrailClient.extractOutlines().size() == 2, "Delete removes only chosen snapshot"));
         context.clickScreenButton("gui.done"); context.waitForScreen(TrailScreen.class);
-        context.clickScreenButton(label(context, "모드:")); context.waitForScreen(TemporaryScreen.class);
-        context.clickScreenButton(label(context, "모드:"));
+        // The two controls live on the same screen, with no mutually exclusive mode selector.
+        context.clickScreenButton(label(context, "계속 유지:"));
+        context.clickScreenButton("redstone_trail.temporary_title"); context.waitForScreen(TemporaryScreen.class);
+        context.clickScreenButton("redstone_trail.temporary_appearance"); context.waitForScreen(AppearanceScreen.class);
+        color(context, "#33DDFF"); slider(context, "투명도:", 10);
+        context.clickScreenButton("redstone_trail.apply"); context.waitForScreen(TemporaryScreen.class);
         context.clickScreenButton(label(context, "사라짐:")); context.clickScreenButton(label(context, "사라짐:"));
         context.takeScreenshot("temporary-settings-small-ko");
         context.clickScreenButton("redstone_trail.apply"); context.waitForScreen(TrailScreen.class);
-        context.runOnClient(mc -> check(RedstoneTrailClient.manager.book().temporary().enabled()
-                && RedstoneTrailClient.manager.book().temporary().fade() == TrailBook.Fade.AFTER_DURATION, "Temporary controls apply chosen mode and fade behavior"));
+        context.runOnClient(mc -> check(!RedstoneTrailClient.manager.book().temporary().enabled()
+                && RedstoneTrailClient.manager.book().style().color() == 0xFF44BB
+                && RedstoneTrailClient.manager.book().temporaryStyle().color() == 0x33DDFF,
+                "Temporary settings edit only temporary appearance and do not turn it on"));
+        context.clickScreenButton(label(context, "일시적 트레일:"));
         context.clickScreenButton("gui.done");
-        String[] blocks = {"gold_block", "diamond_block", "emerald_block"};
+        world.getServer().runCommand("setblock 8 81 0 minecraft:gold_block");
+        context.waitFor(mc -> RedstoneTrailClient.manager.book().temporarySize() == 1);
+        context.runOnClient(mc -> check(!RedstoneTrailClient.manager.book().recording()
+                && RedstoneTrailClient.manager.book().size() == 2, "Temporary On records without persistent Start"));
+        menu(context); context.takeScreenshot("temporary-on-recording-off-ko");
+        context.clickScreenButton("redstone_trail.start");
+        world.getServer().runCommand("setblock 9 81 0 minecraft:diamond_block");
+        context.waitFor(mc -> RedstoneTrailClient.manager.book().size() == 3 && RedstoneTrailClient.manager.book().temporarySize() == 2);
+        menu(context); context.takeScreenshot("both-running-small-ko"); context.clickScreenButton("redstone_trail.stop");
+        world.getServer().runCommand("setblock 10 81 0 minecraft:emerald_block");
+        context.waitFor(mc -> RedstoneTrailClient.manager.book().temporaryAt(RedstoneTrailClient.manager.target(new BlockPos(10,81,0))) != null);
+        context.runOnClient(mc -> check(RedstoneTrailClient.manager.book().size() == 3
+                && RedstoneTrailClient.manager.book().temporary().enabled(), "Stop affects only persistent recording"));
+        context.clickScreenButton("redstone_trail.clear"); context.waitForScreen(ConfirmScreen.class); context.clickScreenButton("gui.yes");
+        context.runOnClient(mc -> check(RedstoneTrailClient.manager.book().size() == 0 && RedstoneTrailClient.manager.book().temporarySize() > 0
+                && RedstoneTrailClient.manager.book().saved().size() == 1, "Clear leaves live temporary marks and saved comparisons"));
+        context.clickScreenButton("redstone_trail.start");
+        world.getServer().runCommand("setblock 11 81 0 minecraft:gold_block");
+        context.waitFor(mc -> RedstoneTrailClient.manager.book().size() == 1);
+        menu(context); context.clickScreenButton(label(context, "일시적 트레일:"));
+        context.runOnClient(mc -> check(RedstoneTrailClient.manager.book().temporarySize() == 0 && !RedstoneTrailClient.manager.book().temporary().enabled()
+                && RedstoneTrailClient.manager.book().recording() && RedstoneTrailClient.manager.book().size() == 1,
+                "Temporary Off clears only its own marks while recording continues"));
+        world.getServer().runCommand("setblock 12 81 0 minecraft:diamond_block");
+        context.waitFor(mc -> RedstoneTrailClient.manager.book().size() == 2);
+        context.takeScreenshot("recording-on-temporary-off-ko");
+        context.clickScreenButton("gui.done");
+        String[] blocks = {"diamond_block", "emerald_block", "gold_block"};
         for (var fade : TrailBook.Fade.values()) {
             context.runOnClient(mc -> {
-                var m = RedstoneTrailClient.manager; m.clear(); m.book().setVisible(true);
-                m.book().configureTemporary(new TrailBook.Temporary(true, 2, fade, 1)); m.start();
+                var m = RedstoneTrailClient.manager;
+                m.setTemporaryEnabled(false);
+                m.book().configureTemporary(new TrailBook.Temporary(true, 2, fade, 1));
+                m.setTemporaryEnabled(true);
             });
             world.getServer().runCommand("setblock 8 81 0 minecraft:" + blocks[fade.ordinal()]);
-            context.waitFor(mc -> RedstoneTrailClient.manager.book().size() == 1);
+            context.waitFor(mc -> RedstoneTrailClient.manager.book().temporarySize() == 1);
             if (fade != TrailBook.Fade.INSTANT) {
                 context.waitFor(mc -> {
-                    var b = RedstoneTrailClient.manager.book(); var mark = b.at(RedstoneTrailClient.manager.target(new BlockPos(8,81,0)));
-                    return mark != null && b.opacity(mark) < .8 && b.opacity(mark) > .1;
+                    var b0 = RedstoneTrailClient.manager.book();
+                    var mark = b0.temporaryAt(RedstoneTrailClient.manager.target(new BlockPos(8,81,0)));
+                    return mark != null && b0.opacity(mark) < .8 && b0.opacity(mark) > .1;
                 });
-                context.runOnClient(mc -> check(RedstoneTrailClient.extractOutlines().stream().anyMatch(o -> (o.color() >>> 24) < RedstoneTrailClient.manager.book().style().argb(1) >>> 24), "Actual renderer receives fading alpha"));
+                context.runOnClient(mc -> check(RedstoneTrailClient.extractOutlines().stream().anyMatch(o ->
+                        (o.color() & 0xFFFFFF) == 0x33DDFF
+                        && (o.color() >>> 24) < (RedstoneTrailClient.manager.book().temporaryStyle().argb(1) >>> 24)),
+                        "Actual temporary renderer receives fading alpha independently"));
             }
-            context.runOnClient(mc -> RedstoneTrailClient.manager.stop());
-            context.waitFor(mc -> RedstoneTrailClient.manager.book().size() == 0);
-            context.runOnClient(mc -> check(RedstoneTrailClient.extractOutlines().size() == 2, "Expired temporary marks disappear while saved comparison remains"));
+            context.waitFor(mc -> RedstoneTrailClient.manager.book().temporarySize() == 0);
+            context.runOnClient(mc -> check(RedstoneTrailClient.manager.book().at(RedstoneTrailClient.manager.target(new BlockPos(8,81,0))) != null
+                    && RedstoneTrailClient.manager.book().recording() && RedstoneTrailClient.extractOutlines().size() >= 3,
+                    "Temporary expiry cannot erase persistent marks or stop recording"));
         }
         context.runOnClient(mc -> {
+            int size = RedstoneTrailClient.manager.book().size();
             RedstoneTrailClient.manager.saveAll(); RedstoneTrailClient.manager = new TrailManager(); RedstoneTrailClient.manager.tick(mc);
-            check(RedstoneTrailClient.manager.book().saved().size() == 1 && RedstoneTrailClient.manager.book().size() == 0
-                    && RedstoneTrailClient.manager.book().temporary().enabled(), "Reload restores saved comparisons/settings, not temporary marks");
+            check(RedstoneTrailClient.manager.book().saved().size() == 1 && RedstoneTrailClient.manager.book().size() == size
+                    && RedstoneTrailClient.manager.book().temporarySize() == 0 && RedstoneTrailClient.manager.book().temporary().enabled()
+                    && !RedstoneTrailClient.manager.book().recording(), "Reload restores both preferences and durable marks; temporary history stays empty");
         });
     }
     @Override public void runTest(ClientGameTestContext context) {
