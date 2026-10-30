@@ -39,6 +39,7 @@ public final class TrailBookTest {
         catch (IllegalArgumentException expected) { failed = true; }
         check(failed, "Invalid marks rejected");
         TrailFeaturesTest.run();
+        TrailSettingsTest.run();
         System.out.println("TrailBookTest: all checks passed");
     }
 }

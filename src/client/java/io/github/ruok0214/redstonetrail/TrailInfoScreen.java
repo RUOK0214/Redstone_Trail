@@ -5,7 +5,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-/** World-specific settings are available after joining a world. */
+/** Recording controls are available after joining a world. */
 final class TrailInfoScreen extends Screen {
     private final Screen parent;
     TrailInfoScreen(Screen parent) { super(Component.literal("Redstone Trail")); this.parent = parent; }

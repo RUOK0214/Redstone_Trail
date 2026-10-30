@@ -4,7 +4,7 @@
   "version": "${version}",
   "name": "Redstone Trail",
   "icon": "assets/redstone_trail/icon.png",
-  "description": "Record lasting block-change trails and toggle an independent temporary overlay, separately or together. Edit color, width and transparency, compare saved trails, and choose three timed fade effects. Open /rt. Client-only for Minecraft 26.2; comparisons persist per world.",
+  "description": "Record lasting block-change trails and toggle an independent temporary overlay. Edit outlines, compare saved trails and use three fade effects. Settings carry across worlds; recordings stay per world. Radius up to 512 blocks. Open /rt. Client-only for Minecraft 26.2.",
   "authors": ["RUOK0214"],
   "license": "MIT",
   "environment": "client",

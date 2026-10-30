@@ -181,6 +181,7 @@ public final class TrailClientGameTest implements FabricClientGameTest {
         context.getInput().resizeWindow(1000, 700);
         boolean hasModMenu = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("modmenu");
         if (hasModMenu) TrailModMenuGameChecks.title(context);
+        TrailSharedSettingsGameChecks.FirstWorld sharedCheck;
         try (var world = context.worldBuilder().create()) {
             world.getConnection().waitForChunksDownload();
             world.getServer().runCommand("gamemode creative @a");
@@ -244,6 +245,8 @@ public final class TrailClientGameTest implements FabricClientGameTest {
             context.getInput().resizeWindow(854, 480); context.waitTick(); context.takeScreenshot("menu-small-ko");
             context.clickScreenButton("gui.done");
             features(context, world);
+            sharedCheck = TrailSharedSettingsGameChecks.prepare(context, world);
         }
+        TrailSharedSettingsGameChecks.switchWorlds(context, sharedCheck);
     }
 }

@@ -23,7 +23,7 @@ public final class TrailScreen extends TrailPanel {
             minecraft.gui.setScreen(this);
         }, tr("clear_title"), tr("clear_hint"))));
         radius = addRenderableWidget(Button.builder(tr("radius", book.radius()), b -> {
-            int value = book.radius(); book.setRadius(value == 128 ? 16 : value * 2);
+            int value = book.radius(); book.setRadius(value == TrailBook.MAX_RADIUS ? 16 : value * 2);
             manager.save(); b.setMessage(tr("radius", book.radius()));
         }).bounds(left + 10, top + 86, half, 20).build());
         radius.setTooltip(Tooltip.create(tr("radius_hint")));

@@ -26,12 +26,22 @@ public final class TrailManager {
     }
     private final Map<String, Session> sessions = new HashMap<>();
     private final Map<BlockPos, BlockState> knownStates = new HashMap<>();
+    private final TrailSettingsStorage settingsStorage = new TrailSettingsStorage(FabricLoader.getInstance().getConfigDir().resolve("redstone_trail"));
+    private TrailSettings settings, savedSettings;
+    private boolean settingsReadFailed, settingsSaveFailed;
     private Session session;
     private ClientLevel level;
     private int ticks;
+    public TrailManager() {
+        try { settings = savedSettings = settingsStorage.load(); }
+        catch (IOException ex) { settingsReadFailed = true; LOG.error("Preserving unreadable shared trail settings", ex); }
+    }
     public TrailBook book() { return session == null ? null : session.book; }
-    public String error() { return session == null ? null : session.readFailed ? "load_failed" : session.saveFailed ? "save_failed" : null; }
-    public boolean canRecord() { return book() != null && !session.readFailed; }
+    public String error() {
+        if (settingsReadFailed) return "settings_load_failed";
+        return session == null ? null : session.readFailed ? "load_failed" : settingsSaveFailed ? "settings_save_failed" : session.saveFailed ? "save_failed" : null;
+    }
+    public boolean canRecord() { return book() != null && !session.readFailed && !settingsReadFailed; }
     public String dimension() { return level == null ? "" : level.dimension().identifier().toString(); }
     public TrailBook.Target target(BlockPos pos) { return new TrailBook.Target(dimension(), pos.getX(), pos.getY(), pos.getZ()); }
     public static BlockPos pos(TrailBook.Target t) { return new BlockPos(t.x(), t.y(), t.z()); }
@@ -48,6 +58,11 @@ public final class TrailManager {
             if (book() != null) book().clearTemporary();
             save(); knownStates.clear(); level = mc.level;
             session = level == null ? null : sessions.computeIfAbsent(identity(mc), Session::new);
+            if (canRecord()) {
+                if (settings == null) settings = TrailSettings.from(book());
+                else settings.applyTo(book());
+                saveSettings();
+            }
         }
         if (book() != null) {
             book().setTemporaryCenter(mc.player == null ? null : target(mc.player.blockPosition()));
@@ -71,7 +86,7 @@ public final class TrailManager {
         book().stop(); if (!book().temporary().enabled()) knownStates.clear(); save(); message("stopped");
     }
     public void clear() {
-        if (book() == null || session.readFailed) return;
+        if (!canRecord()) return;
         book().clear(); if (!book().temporary().enabled()) knownStates.clear(); save();
     }
     public void setTemporaryEnabled(boolean enabled) {
@@ -90,7 +105,7 @@ public final class TrailManager {
         knownStates.putIfAbsent(position.immutable(), source.getBlockState(position));
     }
     private boolean observing(ClientLevel source, BlockPos pos) {
-        return source == level && source == Minecraft.getInstance().level && book() != null
+        return source == level && source == Minecraft.getInstance().level && canRecord()
                 && source.hasChunkAt(pos) && book().accepts(target(pos));
     }
     /** Called before each authoritative block packet applies, including section updates. */
@@ -110,14 +125,24 @@ public final class TrailManager {
         if (source == level) knownStates.keySet().removeIf(pos -> pos.getX() >> 4 == x && pos.getZ() >> 4 == z);
     }
     public void save() {
-        if (session == null || session.readFailed || session.savedRevision == book().revision()) return;
-        try { session.storage.save(book()); session.savedRevision = book().revision(); session.saveFailed = false; }
-        catch (IOException ex) { session.saveFailed = true; LOG.error("Cannot save Redstone Trail", ex); }
+        if (canRecord()) settings = TrailSettings.from(book());
+        saveSettings();
+        saveSession(session);
+    }
+    private void saveSettings() {
+        if (settingsReadFailed || settings == null || settings.equals(savedSettings)) return;
+        try { settingsStorage.save(settings); savedSettings = settings; settingsSaveFailed = false; }
+        catch (IOException ex) { settingsSaveFailed = true; LOG.error("Cannot save shared trail settings", ex); }
+    }
+    private void saveSession(Session item) {
+        if (item == null || item.readFailed || item.savedRevision == item.book.revision()) return;
+        try { item.storage.save(item.book); item.savedRevision = item.book.revision(); item.saveFailed = false; }
+        catch (IOException ex) { item.saveFailed = true; LOG.error("Cannot save Redstone Trail", ex); }
     }
     public void saveAll() {
-        Session active = session;
-        for (Session item : sessions.values()) { session = item; save(); }
-        session = active;
+        save();
+        // Inactive worlds must never overwrite the latest shared settings during autosave.
+        for (Session item : sessions.values()) if (item != session) saveSession(item);
     }
     private void message(String key) {
         var player = Minecraft.getInstance().player;

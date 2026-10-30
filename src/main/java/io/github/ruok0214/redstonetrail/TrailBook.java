@@ -6,6 +6,7 @@ import java.util.function.LongSupplier;
 /** Independent persistent recording and live temporary display, plus comparison snapshots. */
 public final class TrailBook {
     public static final int MAX_MARKS = 8192, MAX_SAVED = 16, MAX_SAVED_MARKS = 32768;
+    public static final int MAX_RADIUS = 512;
     public record Target(String dimension, int x, int y, int z) { }
     public record Mark(Target target, long changes, long activatedAt) {
         public Mark(Target target, long changes) { this(target, changes, 0); }
@@ -125,9 +126,10 @@ public final class TrailBook {
     }
     public void setRadius(int value) {
         if (recording) throw new IllegalStateException("Stop before changing the radius");
-        if (value != 16 && value != 32 && value != 64 && value != 128) throw new IllegalArgumentException("radius");
+        if (!validRadius(value)) throw new IllegalArgumentException("radius");
         if (radius != value) { radius = value; revision++; }
     }
+    public static boolean validRadius(int value) { return value >= 16 && value <= MAX_RADIUS && Integer.bitCount(value) == 1; }
     public void setVisible(boolean value) { if (visible != value) { visible = value; revision++; } }
     public void setThroughWalls(boolean value) { if (throughWalls != value) { throughWalls = value; revision++; } }
     public void start(Target origin) { center = Objects.requireNonNull(origin); recording = true; limitReached = false; }

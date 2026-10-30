@@ -76,7 +76,7 @@ public final class RedstoneTrailClient implements ClientModInitializer {
         if ((color >>> 24) == 0) return;
         var t = mark.target();
         if (!t.dimension().equals(manager.dimension()) || !mc.level.hasChunkAt(TrailManager.pos(t))
-                || mc.player.distanceToSqr(t.x() + .5, t.y() + .5, t.z() + .5) > 192 * 192) return;
+                || mc.player.distanceToSqr(t.x() + .5, t.y() + .5, t.z() + .5) > TrailBook.MAX_RADIUS * TrailBook.MAX_RADIUS) return;
         output.add(new Outline(new AABB(TrailManager.pos(t)).inflate(inflation), throughWalls, color, style.width()));
     }
 }
