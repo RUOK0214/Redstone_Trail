@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "redstone_trail",
+  "version": "${version}",
+  "name": "Redstone Trail",
+  "description": "Start recording, trigger a circuit, and keep outlines of changed blocks until cleared. Open /redstonetrail or /rt. Client-only for Minecraft 26.2; trails are saved per world.",
+  "authors": ["RUOK0214"],
+  "license": "MIT",
+  "environment": "client",
+  "contact": { "sources": "https://github.com/RUOK0214/Redstone_Trail" },
+  "entrypoints": { "client": ["io.github.ruok0214.redstonetrail.RedstoneTrailClient"] },
+  "mixins": ["redstone_trail.client.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "26.2",
+    "java": ">=25",
+    "fabric-api": ">=0.160.0+26.2"
+  }
+}

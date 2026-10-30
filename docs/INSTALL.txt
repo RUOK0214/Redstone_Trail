@@ -1,0 +1,15 @@
+Redstone Trail 0.1.0
+Minecraft Java Edition 26.2 / Fabric
+
+1. Minecraft 26.2용 Fabric Loader 0.19.5 이상을 설치합니다.
+2. 해당 게임 프로필의 mods 폴더에 redstone-trail-0.1.0.jar와 26.2용 Fabric API 0.160.0+26.2 이상을 넣습니다.
+3. 게임에서 /rt → 기록 시작 → 회로 작동 → /rt → 기록 정지 순서로 사용합니다.
+4. 윤곽선은 신호가 꺼진 후에도 남으며 경로 초기화로 지울 수 있습니다.
+
+독립된 클라이언트 모드입니다. 서버, Show Interaction, Feedback Flag 설치는 필요하지 않습니다.
+Java 25 이상이 필요합니다. 다른 Minecraft 버전, Forge/NeoForge, Bedrock은 지원하지 않습니다.
+-sources.jar는 개발용이며 mods 폴더에 넣지 않습니다.
+
+기본 반경은 시작 위치 중심 64블록입니다. 범위 안의 모든 블록 상태 변화를 기록합니다.
+서버가 전송하지 않은 변화와 상태값이 없는 고체 블록의 통전은 추적할 수 없습니다.
+월드/서버별 경로는 config/redstone_trail/worlds에 저장됩니다.
