@@ -13,7 +13,7 @@ Minecraft Java **26.2 / Fabric**용 클라이언트 모드입니다. **하나의
 - Fabric API **0.160.0+26.2** 또는 해당 게임 버전의 호환 버전
 - Java **25 이상**
 
-`redstone-trail-0.4.0.jar`와 Fabric API를 게임 프로필의 `mods` 폴더에 넣으세요. 이전 Redstone Trail JAR는 새 버전으로 교체하세요.
+`redstone-trail-0.4.1.jar`와 Fabric API를 게임 프로필의 `mods` 폴더에 넣으세요. 이전 Redstone Trail JAR는 새 버전으로 교체하세요.
 두 기능 모두 이 JAR 하나에 포함되어 있습니다. `-sources.jar`는 개발용 소스이며 설치용이 아닙니다.
 Show Interaction이나 Feedback Flag 및 서버 쪽 설치는 필요하지 않습니다. 표시와 기록은 본인에게만 적용됩니다.
 
@@ -159,7 +159,7 @@ Show Interaction이나 Feedback Flag 및 서버 쪽 설치는 필요하지 않�
 ```
 
 Linux/macOS에서는 `bash ./gradlew`를 사용하세요. Java 25가 필요합니다.
-설치 파일은 `build/libs/redstone-trail-0.4.0.jar`입니다.
+설치 파일은 `build/libs/redstone-trail-0.4.1.jar`입니다.
 `build`는 두 기능의 독립 작동, 범위·누적·한도·저장 복원, 비교본 독립성, 이전 파일 이전과 세 소멸 방식의 경계 시점을 검사합니다.
 `runClientGameTest`는 별도 테스트 월드에서 실제 UI, 회로, 패킷 처리와 렌더링을 검사하며 사용자 월드를 수정하지 않습니다.
 개발 환경에는 Mod Menu를 기본 제공하며, `-PwithoutModMenu`로 선택 의존성이 없는 환경도 검사합니다.
