@@ -64,12 +64,9 @@ public final class RedstoneTrailClient implements ClientModInitializer {
             addOutline(result, mc, mark, book.style(), 1, .004, book.throughWalls());
         if (book.temporary().enabled()) for (var mark : book.temporaryMarks())
             addOutline(result, mc, mark, book.temporaryStyle(), book.opacity(mark), .042, book.throughWalls());
-        int layer = 1;
         for (var saved : book.saved()) {
-            // Slightly separated bounds keep overlapping comparison colors distinguishable.
             if (saved.visible()) for (var mark : saved.marks())
-                addOutline(result, mc, mark, saved.style(), 1, .004 + .24 * layer / (layer + 2), book.throughWalls());
-            layer++;
+                addOutline(result, mc, mark, saved.style(), 1, .004, book.throughWalls());
         }
         return List.copyOf(result);
     }

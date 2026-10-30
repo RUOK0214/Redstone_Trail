@@ -60,6 +60,7 @@ public final class TrailClientGameTest implements FabricClientGameTest {
         var blue = context.computeOnClient(mc -> RedstoneTrailClient.manager.book().style());
         check(blue.color() == 0x12ABEF && blue.transparency() > 0 && blue.width() > 2.5, "Current appearance applies after resize");
         context.runOnClient(mc -> check(RedstoneTrailClient.extractOutlines().stream().allMatch(o -> o.color() == blue.argb(1) && o.width() == blue.width()), "Existing current marks use edited alpha, color and width"));
+        var originalBoxes = context.computeOnClient(mc -> RedstoneTrailClient.extractOutlines().stream().map(o -> o.box()).toList());
         snapshot(context, "회로 A");
         context.clickScreenButton("redstone_trail.appearance"); color(context, "invalid");
         context.runOnClient(mc -> check(mc.gui.screen().children().stream().filter(Button.class::isInstance).map(Button.class::cast)
@@ -71,7 +72,7 @@ public final class TrailClientGameTest implements FabricClientGameTest {
         context.runOnClient(mc -> {
             var outlines = RedstoneTrailClient.extractOutlines();
             check(outlines.size() == 4 && outlines.stream().map(o -> o.color() & 0xFFFFFF).distinct().count() == 2, "Two independently colored snapshots show together while current trail is hidden");
-            check(outlines.stream().map(o -> Math.round(o.box().getXsize() * 1000)).distinct().count() == 2, "Overlapping comparisons use separated bounds");
+            check(outlines.stream().map(o -> o.box()).distinct().toList().equals(originalBoxes), "Saved comparisons preserve the original outline size and position");
         });
         context.clickScreenButton("gui.done");
         world.getServer().runCommand("tp @a 6.5 81 4.5 180 20");
@@ -96,7 +97,9 @@ public final class TrailClientGameTest implements FabricClientGameTest {
         firstButton(context, "delete"); context.waitForScreen(ConfirmScreen.class); context.clickScreenButton("gui.no");
         context.runOnClient(mc -> check(RedstoneTrailClient.manager.book().saved().size() == 2, "Cancel snapshot deletion keeps both trails"));
         firstButton(context, "delete"); context.waitForScreen(ConfirmScreen.class); context.clickScreenButton("gui.yes");
-        context.runOnClient(mc -> check(RedstoneTrailClient.manager.book().saved().size() == 1 && RedstoneTrailClient.extractOutlines().size() == 2, "Delete removes only chosen snapshot"));
+        context.runOnClient(mc -> check(RedstoneTrailClient.manager.book().saved().size() == 1
+                && RedstoneTrailClient.extractOutlines().stream().map(o -> o.box()).toList().equals(originalBoxes),
+                "Deleting another snapshot leaves the remaining outline size and position unchanged"));
         context.clickScreenButton("gui.done"); context.waitForScreen(TrailScreen.class);
         // The two controls live on the same screen, with no mutually exclusive mode selector.
         context.clickScreenButton(label(context, "계속 유지:"));

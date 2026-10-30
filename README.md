@@ -13,7 +13,7 @@ Minecraft Java **26.2 / Fabric**용 클라이언트 모드입니다. **하나의
 - Fabric API **0.160.0+26.2** 또는 해당 게임 버전의 호환 버전
 - Java **25 이상**
 
-`redstone-trail-0.3.0.jar`와 Fabric API를 게임 프로필의 `mods` 폴더에 넣으세요. 이전 Redstone Trail JAR는 새 버전으로 교체하세요.
+`redstone-trail-0.3.1.jar`와 Fabric API를 게임 프로필의 `mods` 폴더에 넣으세요. 이전 Redstone Trail JAR는 새 버전으로 교체하세요.
 두 기능 모두 이 JAR 하나에 포함되어 있습니다. `-sources.jar`는 개발용 소스이며 설치용이 아닙니다.
 Show Interaction이나 Feedback Flag 및 서버 쪽 설치는 필요하지 않습니다. 표시와 기록은 본인에게만 적용됩니다.
 
@@ -63,7 +63,8 @@ Show Interaction이나 Feedback Flag 및 서버 쪽 설치는 필요하지 않�
 비교용 저장은 **계속 유지 경로의 복사본**입니다. 일시적 트레일은 포함하지 않습니다.
 저장 이후의 기록·초기화·색 변경에 영향받지 않으며 자동 소멸하지 않습니다.
 ‘임시 저장’한 비교본도 재접속 후 유지되고 직접 삭제할 때 제거됩니다.
-같은 위치의 여러 윤곽선은 색을 구분할 수 있도록 크기를 조금 달리 표시하며 실제 좌표는 바뀌지 않습니다.
+저장본의 윤곽 크기와 위치는 원래 계속 유지 경로와 같습니다. 저장 순서나 개수에 따른 확대·오프셋은 없습니다.
+이전에 저장한 트레일에도 동일하게 적용됩니다. 같은 위치는 서로 겹치므로 필요하면 저장본별 보이기·숨기기로 비교하세요.
 
 ![저장본별 보이기·숨기기·수정·삭제](docs/screenshots/saved-trails-small-ko.png)
 
@@ -139,7 +140,7 @@ Show Interaction이나 Feedback Flag 및 서버 쪽 설치는 필요하지 않�
 ```
 
 Linux/macOS에서는 `bash ./gradlew`를 사용하세요. Java 25가 필요합니다.
-설치 파일은 `build/libs/redstone-trail-0.3.0.jar`입니다.
+설치 파일은 `build/libs/redstone-trail-0.3.1.jar`입니다.
 `build`는 두 기능의 독립 작동, 범위·누적·한도·저장 복원, 비교본 독립성, 이전 파일 이전과 세 소멸 방식의 경계 시점을 검사합니다.
 `runClientGameTest`는 별도 테스트 월드에서 실제 UI, 회로, 패킷 처리와 렌더링을 검사하며 사용자 월드를 수정하지 않습니다.
 
