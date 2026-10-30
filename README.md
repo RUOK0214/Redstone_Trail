@@ -13,9 +13,17 @@ Minecraft Java **26.2 / Fabric**용 클라이언트 모드입니다. **하나의
 - Fabric API **0.160.0+26.2** 또는 해당 게임 버전의 호환 버전
 - Java **25 이상**
 
-`redstone-trail-0.3.1.jar`와 Fabric API를 게임 프로필의 `mods` 폴더에 넣으세요. 이전 Redstone Trail JAR는 새 버전으로 교체하세요.
+`redstone-trail-0.3.2.jar`와 Fabric API를 게임 프로필의 `mods` 폴더에 넣으세요. 이전 Redstone Trail JAR는 새 버전으로 교체하세요.
 두 기능 모두 이 JAR 하나에 포함되어 있습니다. `-sources.jar`는 개발용 소스이며 설치용이 아닙니다.
 Show Interaction이나 Feedback Flag 및 서버 쪽 설치는 필요하지 않습니다. 표시와 기록은 본인에게만 적용됩니다.
+
+선택 사항으로 [Mod Menu](https://modrinth.com/mod/modmenu) **20.0.3**와
+[Text Placeholder API](https://modrinth.com/mod/placeholder-api) **3.1.0-beta.1+26.2**를 설치하면
+모드 목록에서 전용 아이콘과 한국어·영어 설명을 볼 수 있습니다.
+**Redstone Trail → 설정 버튼**은 월드 안에서 기록 메뉴를 열고, 시작 화면에서는 사용 안내를 표시합니다.
+완료/Escape로 Mod Menu에 돌아가며, 기록 시작을 누르면 바로 게임으로 복귀합니다. Mod Menu 없이도 기존 `/rt` 기능은 모두 동작합니다.
+
+![Mod Menu의 한국어 설명과 아이콘](docs/screenshots/modmenu-ko.png)
 
 ## 두 기능의 독립 조작
 
@@ -136,13 +144,15 @@ Show Interaction이나 Feedback Flag 및 서버 쪽 설치는 필요하지 않�
 ```powershell
 .\gradlew.bat build
 .\gradlew.bat runClientGameTest
+.\gradlew.bat runClientGameTest -PwithoutModMenu
 .\gradlew.bat runClient
 ```
 
 Linux/macOS에서는 `bash ./gradlew`를 사용하세요. Java 25가 필요합니다.
-설치 파일은 `build/libs/redstone-trail-0.3.1.jar`입니다.
+설치 파일은 `build/libs/redstone-trail-0.3.2.jar`입니다.
 `build`는 두 기능의 독립 작동, 범위·누적·한도·저장 복원, 비교본 독립성, 이전 파일 이전과 세 소멸 방식의 경계 시점을 검사합니다.
 `runClientGameTest`는 별도 테스트 월드에서 실제 UI, 회로, 패킷 처리와 렌더링을 검사하며 사용자 월드를 수정하지 않습니다.
+개발 환경에는 Mod Menu를 기본 제공하며, `-PwithoutModMenu`로 선택 의존성이 없는 환경도 검사합니다.
 
 검증 범위와 한계는 [검증 기록](docs/VERIFICATION.md)을 참고하세요.
 렌더링은 [Fabric의 월드 렌더링 구조](https://docs.fabricmc.net/develop/rendering/world)에 맞춰 월드 읽기와 그리기를 분리합니다.

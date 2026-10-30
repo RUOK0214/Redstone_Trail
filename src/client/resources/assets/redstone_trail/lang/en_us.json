@@ -1,4 +1,9 @@
 {
+  "modmenu.summaryTranslation.redstone_trail": "Record block-state changes as outlines and compare multiple trails.",
+  "modmenu.descriptionTranslation.redstone_trail": "Outline blocks whose state changes in redstone circuits and other builds.\n\n• Permanent recording: use Start/Stop to accumulate lasting trails.\n• Temporary trails: toggle independently, or run alongside permanent recording.\n• Edit color, line width, transparency, lifetime and three fade behaviors.\n• Save multiple comparisons, then show, hide, edit or delete each one. Saved outlines keep the original size and position.\n\nJoin a world and open /rt or the configuration button. Settings and comparisons are stored per world/server.\n\nClient-only. Detects server-reported block-state changes; cannot detect power passing through solid blocks whose state does not change.",
+  "redstone_trail.about_world": "Join a world or server, then use this configuration button again or enter /rt. Trails and settings are managed per world/server.",
+  "redstone_trail.about_controls": "Use Start/Stop for lasting trails. The separate temporary-trail toggle works independently; both can run at the same time.",
+  "redstone_trail.about_saved": "Edit color, width and transparency for current or saved trails, and compare multiple saved trails using show, hide and delete.",
   "key.category.redstone_trail.main": "Redstone Trail",
   "key.redstone_trail.menu": "Open trail recording menu",
   "redstone_trail.title": "Redstone Trail",

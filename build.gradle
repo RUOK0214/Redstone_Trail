@@ -2,7 +2,11 @@ plugins { id 'net.fabricmc.fabric-loom' version "${loom_version}" }
 version = project.mod_version
 group = project.maven_group
 base { archivesName = project.archives_base_name }
-repositories { mavenCentral() }
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.terraformersmc.com/' }
+    maven { url = 'https://maven.nucleoid.xyz/' }
+}
 loom {
     splitEnvironmentSourceSets()
     mods {
@@ -16,6 +20,11 @@ dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+    if (!project.hasProperty('withoutModMenu')) {
+        runtimeOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
+        runtimeOnly "eu.pb4:placeholder-api:${project.placeholder_api_version}"
+    }
 }
 processResources {
     inputs.property 'version', project.version
@@ -49,3 +58,4 @@ fabricApi {
         eula = true
     }
 }
+dependencies { gametestCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}" }

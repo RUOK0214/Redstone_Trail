@@ -179,6 +179,8 @@ public final class TrailClientGameTest implements FabricClientGameTest {
     }
     @Override public void runTest(ClientGameTestContext context) {
         context.getInput().resizeWindow(1000, 700);
+        boolean hasModMenu = net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("modmenu");
+        if (hasModMenu) TrailModMenuGameChecks.title(context);
         try (var world = context.worldBuilder().create()) {
             world.getConnection().waitForChunksDownload();
             world.getServer().runCommand("gamemode creative @a");
@@ -194,7 +196,9 @@ public final class TrailClientGameTest implements FabricClientGameTest {
                 mc.getLanguageManager().setSelected("ko_kr"); mc.options.languageCode = "ko_kr";
                 mc.reloadResourcePacks();
             });
-            context.waitTicks(60); menu(context); context.takeScreenshot("menu-ko");
+            context.waitTicks(60);
+            if (hasModMenu) TrailModMenuGameChecks.inWorld(context);
+            menu(context); context.takeScreenshot("menu-ko");
             context.clickScreenButton("redstone_trail.start"); context.waitTick();
             context.runOnClient(mc -> check(mc.gui.screen() == null && RedstoneTrailClient.manager.book().recording(), "Start button records and returns to game"));
             // Real mouse input exercises client prediction as well as server confirmation.

@@ -1,6 +1,19 @@
 # 검증 기록
 
-검증일: **2026-10-30 (한국 시간)** · 버전: **0.3.1**
+검증일: **2026-10-30 (한국 시간)** · 버전: **0.3.2**
+
+## Mod Menu 설명·아이콘·설정 연결
+
+- Mod Menu 20.0.3 / Text Placeholder API 3.1.0-beta.1+26.2에서 전용 PNG 아이콘과 영어·한국어 설명 표시.
+- 실제 Mod Menu 목록에서 Redstone Trail을 선택하고 설정 버튼을 눌러 연결 검사.
+- 월드 진입 전에는 사용 안내 표시, 완료 버튼으로 원래 Mod Menu에 복귀.
+- 월드 안에서는 기존 경로 메뉴 표시. 완료/Escape로 Mod Menu 복귀, 기록 시작은 게임으로 복귀하며 기록 시작.
+- Mod Menu를 포함한 환경에서 기존 기록·저장·비교·윤곽 크기·소멸 기능의 실제 게임 검사 통과.
+- `runClientGameTest -PwithoutModMenu --offline --no-daemon`으로 Mod Menu와 Text Placeholder API 없는 환경에서도 기존 게임 검사 통과.
+- 배포 JAR는 Mod Menu와 Text Placeholder API를 포함하거나 필수로 요구하지 않음.
+
+화면: `docs/screenshots/modmenu-ko.png`, `modmenu-title.png`, `modmenu-world-required.png`.
+아이콘 원본 경로와 생성 기록: [ICON.md](ICON.md).
 
 ## 독립 작동과 동시 표시
 

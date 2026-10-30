@@ -1,4 +1,9 @@
 {
+  "modmenu.summaryTranslation.redstone_trail": "블록 상태 변화를 윤곽선으로 기록하고 여러 경로를 비교합니다.",
+  "modmenu.descriptionTranslation.redstone_trail": "레드스톤 회로 등에서 상태가 변한 블록을 윤곽선으로 표시합니다.\n\n• 계속 유지: 기록 시작·정지로 경로를 누적합니다.\n• 일시적 트레일: 별도 켜기·끄기 버튼으로 작동하며, 계속 유지 기록과 동시에 사용할 수 있습니다.\n• 색·선 두께·투명도, 유지 시간과 세 가지 소멸 방식을 설정할 수 있습니다.\n• 여러 경로를 비교용으로 저장하고, 각각 표시·숨기기·수정·삭제할 수 있습니다. 저장본은 원래 크기와 위치를 유지합니다.\n\n월드에 들어간 뒤 /rt 또는 설정 버튼으로 메뉴를 여세요. 설정과 저장본은 월드/서버별로 보관합니다.\n\n클라이언트 전용입니다. 서버가 전달한 블록 상태 변화만 감지하며, 상태가 변하지 않는 고체 블록의 통전은 감지하지 못합니다.",
+  "redstone_trail.about_world": "월드나 서버에 들어간 뒤 이 설정 버튼을 다시 누르거나 /rt를 입력하세요. 경로와 설정은 월드/서버별로 관리합니다.",
+  "redstone_trail.about_controls": "계속 유지 경로는 기록 시작·정지로 조작합니다. 일시적 트레일은 별도 켜기·끄기 버튼으로 조작하며 두 기능을 동시에 사용할 수 있습니다.",
+  "redstone_trail.about_saved": "이미 그린 경로와 저장본의 색·두께·투명도를 수정하고, 여러 저장본을 표시·숨기기·삭제하며 비교할 수 있습니다.",
   "key.category.redstone_trail.main": "Redstone Trail",
   "key.redstone_trail.menu": "경로 기록 메뉴 열기",
   "redstone_trail.title": "Redstone Trail · 변화 경로 기록",

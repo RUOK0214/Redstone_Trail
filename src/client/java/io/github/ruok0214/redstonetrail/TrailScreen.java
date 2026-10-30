@@ -4,17 +4,19 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public final class TrailScreen extends TrailPanel {
     private Button record, radius, clear, snapshot, temporaryToggle;
-    public TrailScreen(TrailManager manager) { super("title", null, manager); }
+    public TrailScreen(TrailManager manager) { this(null, manager); }
+    public TrailScreen(Screen parent, TrailManager manager) { super("title", parent, manager); }
     static Component tr(String key, Object... args) { return Component.translatable("redstone_trail." + key, args); }
     @Override protected void init() {
         layout(400, 232);
         int half = (panelWidth - 26) / 2, right = 16 + half;
         record = button(tr(book.recording() ? "stop" : "start"), 10, 60, half, () -> {
-            if (book.recording()) manager.stop(); else { manager.start(); onClose(); }
+            if (book.recording()) manager.stop(); else { manager.start(); minecraft.gui.setScreen(null); }
         });
         clear = button(tr("clear"), right, 60, half, () -> minecraft.gui.setScreen(new ConfirmScreen(yes -> {
             if (yes && manager.book() == book) manager.clear();
@@ -45,7 +47,7 @@ public final class TrailScreen extends TrailPanel {
     }
     private static Component state(boolean on) { return Component.translatable(on ? "options.on" : "options.off"); }
     private Component temporaryLabel() { return tr("temporary_toggle", state(book.temporary().enabled())); }
-    @Override public void onClose() { manager.save(); minecraft.gui.setScreen(null); }
+    @Override public void onClose() { manager.save(); super.onClose(); }
     @Override public void tick() {
         super.tick();
         if (manager.book() != book) return;
