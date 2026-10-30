@@ -1,10 +1,13 @@
-Redstone Trail 0.1.0
+Redstone Trail 0.2.0
 Minecraft Java Edition 26.2 / Fabric
 
 1. Minecraft 26.2용 Fabric Loader 0.19.5 이상을 설치합니다.
-2. 해당 게임 프로필의 mods 폴더에 redstone-trail-0.1.0.jar와 26.2용 Fabric API 0.160.0+26.2 이상을 넣습니다.
+2. 해당 게임 프로필의 mods 폴더에 redstone-trail-0.2.0.jar와 26.2용 Fabric API 0.160.0+26.2 이상을 넣습니다. 이전 버전 JAR는 제거하세요.
 3. 게임에서 /rt → 기록 시작 → 회로 작동 → /rt → 기록 정지 순서로 사용합니다.
-4. 윤곽선은 신호가 꺼진 후에도 남으며 경로 초기화로 지울 수 있습니다.
+4. 선·색·투명도에서 이미 그려진 경로의 색, 선 두께, 투명도를 바꿀 수 있습니다.
+5. 비교용 임시 저장 → 저장한 트레일에서 여러 경로를 함께 표시하고, 각각 수정·숨기기·삭제할 수 있습니다.
+6. 모드 → 일시적 트레일에서 유지 시간과 소멸 방식(서서히 / 만료 즉시 / 만료 후 서서히)을 설정합니다.
+7. 현재 경로 초기화는 저장본을 지우지 않습니다. 비교용 저장본은 직접 삭제할 때까지 남습니다.
 
 독립된 클라이언트 모드입니다. 서버, Show Interaction, Feedback Flag 설치는 필요하지 않습니다.
 Java 25 이상이 필요합니다. 다른 Minecraft 버전, Forge/NeoForge, Bedrock은 지원하지 않습니다.

@@ -20,7 +20,7 @@ public final class TrailStorage {
     public Path file() { return file; }
     public TrailBook load() throws IOException {
         if (!Files.exists(file)) return new TrailBook();
-        if (Files.size(file) > 8 * 1024 * 1024) throw new IOException("Trail file exceeds 8 MiB");
+        if (Files.size(file) > 32 * 1024 * 1024) throw new IOException("Trail file exceeds 32 MiB");
         try (var reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             return TrailBook.restore(GSON.fromJson(reader, TrailBook.Data.class));
         } catch (RuntimeException ex) { throw new IOException("Invalid trail file: " + file, ex); }

@@ -23,7 +23,7 @@ public final class RedstoneTrailClient implements ClientModInitializer {
     public static KeyMapping openMenu;
     private boolean menuRequested;
     private volatile List<Outline> outlines = List.of();
-    record Outline(AABB box, boolean throughWalls) { }
+    record Outline(AABB box, boolean throughWalls, int color, float width) { }
     @Override public void onInitializeClient() {
         manager = new TrailManager();
         var category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("redstone_trail", "main"));
@@ -49,7 +49,7 @@ public final class RedstoneTrailClient implements ClientModInitializer {
         LevelRenderEvents.BEFORE_GIZMOS.register(context -> {
             try (var ignored = context.levelRenderer().collectPerFrameRenderThreadGizmos()) {
                 for (var outline : outlines) {
-                    var gizmo = Gizmos.cuboid(outline.box(), GizmoStyle.stroke(0xFFFFB74D, 2.5f));
+                    var gizmo = Gizmos.cuboid(outline.box(), GizmoStyle.stroke(outline.color(), outline.width()));
                     if (outline.throughWalls()) gizmo.setAlwaysOnTop();
                 }
             }
@@ -58,14 +58,26 @@ public final class RedstoneTrailClient implements ClientModInitializer {
     static List<Outline> extractOutlines() {
         Minecraft mc = Minecraft.getInstance();
         var book = manager.book();
-        if (mc.level == null || mc.player == null || book == null || !book.visible() || mc.gui.hud.isHidden()) return List.of();
+        if (mc.level == null || mc.player == null || book == null || mc.gui.hud.isHidden()) return List.of();
         List<Outline> result = new ArrayList<>();
-        for (var mark : book.marks()) {
-            var t = mark.target();
-            if (!t.dimension().equals(manager.dimension()) || !mc.level.hasChunkAt(TrailManager.pos(t))
-                    || mc.player.distanceToSqr(t.x() + .5, t.y() + .5, t.z() + .5) > 192 * 192) continue;
-            result.add(new Outline(new AABB(TrailManager.pos(t)).inflate(.004), book.throughWalls()));
+        if (book.visible()) for (var mark : book.marks())
+            addOutline(result, mc, mark, book.style(), book.opacity(mark), .004, book.throughWalls());
+        int layer = 1;
+        for (var saved : book.saved()) {
+            // Slightly separated bounds keep overlapping comparison colors distinguishable.
+            if (saved.visible()) for (var mark : saved.marks())
+                addOutline(result, mc, mark, saved.style(), 1, .004 + .24 * layer / (layer + 2), book.throughWalls());
+            layer++;
         }
         return List.copyOf(result);
+    }
+    private static void addOutline(List<Outline> output, Minecraft mc, TrailBook.Mark mark, TrailBook.Style style,
+                                   double fade, double inflation, boolean throughWalls) {
+        int color = style.argb(fade);
+        if ((color >>> 24) == 0) return;
+        var t = mark.target();
+        if (!t.dimension().equals(manager.dimension()) || !mc.level.hasChunkAt(TrailManager.pos(t))
+                || mc.player.distanceToSqr(t.x() + .5, t.y() + .5, t.z() + .5) > 192 * 192) return;
+        output.add(new Outline(new AABB(TrailManager.pos(t)).inflate(inflation), throughWalls, color, style.width()));
     }
 }

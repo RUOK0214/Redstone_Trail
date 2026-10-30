@@ -4,64 +4,58 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-public final class TrailScreen extends Screen {
-    private final TrailManager manager;
-    private int left, top, panelWidth;
-    private Button record, radius, clear;
-    public TrailScreen(TrailManager manager) { super(tr("title")); this.manager = manager; }
+public final class TrailScreen extends TrailPanel {
+    private Button record, radius, clear, snapshot;
+    public TrailScreen(TrailManager manager) { super("title", null, manager); }
     static Component tr(String key, Object... args) { return Component.translatable("redstone_trail." + key, args); }
     @Override protected void init() {
-        panelWidth = Math.min(360, width - 16); left = (width - panelWidth) / 2; top = Math.max(4, (height - 224) / 2);
-        int half = (panelWidth - 26) / 2;
-        record = addRenderableWidget(Button.builder(tr(manager.book().recording() ? "stop" : "start"), b -> {
-            if (manager.book().recording()) manager.stop();
-            else { manager.start(); onClose(); }
-        }).bounds(left + 10, top + 60, half, 20).build());
-        clear = addRenderableWidget(Button.builder(tr("clear"), b -> minecraft.gui.setScreen(new ConfirmScreen(confirmed -> {
-            if (confirmed) manager.clear();
+        layout(400, 232);
+        int half = (panelWidth - 26) / 2, right = 16 + half;
+        record = button(tr(book.recording() ? "stop" : "start"), 10, 60, half, () -> {
+            if (book.recording()) manager.stop(); else { manager.start(); onClose(); }
+        });
+        clear = button(tr("clear"), right, 60, half, () -> minecraft.gui.setScreen(new ConfirmScreen(yes -> {
+            if (yes && manager.book() == book) manager.clear();
             minecraft.gui.setScreen(this);
-        }, tr("clear_title"), tr("clear_hint")))).bounds(left + 16 + half, top + 60, half, 20).build());
-        radius = addRenderableWidget(Button.builder(tr("radius", manager.book().radius()), b -> {
-            int value = manager.book().radius(); manager.book().setRadius(value == 128 ? 16 : value * 2);
-            manager.save(); b.setMessage(tr("radius", manager.book().radius()));
-        }).bounds(left + 10, top + 86, panelWidth - 20, 20).build());
+        }, tr("clear_title"), tr("clear_hint"))));
+        radius = addRenderableWidget(Button.builder(tr("radius", book.radius()), b -> {
+            int value = book.radius(); book.setRadius(value == 128 ? 16 : value * 2);
+            manager.save(); b.setMessage(tr("radius", book.radius()));
+        }).bounds(left + 10, top + 86, half, 20).build());
         radius.setTooltip(Tooltip.create(tr("radius_hint")));
-        addRenderableWidget(Button.builder(tr("visible", state(manager.book().visible())), b -> {
-            manager.book().setVisible(!manager.book().visible()); manager.save();
-            b.setMessage(tr("visible", state(manager.book().visible())));
-        }).bounds(left + 10, top + 112, half, 20).build());
-        addRenderableWidget(Button.builder(tr("walls", state(manager.book().throughWalls())), b -> {
-            manager.book().setThroughWalls(!manager.book().throughWalls()); manager.save();
-            b.setMessage(tr("walls", state(manager.book().throughWalls())));
-        }).bounds(left + 16 + half, top + 112, half, 20).build());
-        addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
-                .bounds(left + 10, top + 199, panelWidth - 20, 20).build());
+        button(tr("appearance"), right, 86, half, () -> minecraft.gui.setScreen(new AppearanceScreen(this, manager, null)))
+                .active = manager.canRecord();
+        addRenderableWidget(Button.builder(tr("visible", state(book.visible())), b -> {
+            book.setVisible(!book.visible()); manager.save(); b.setMessage(tr("visible", state(book.visible())));
+        }).bounds(left + 10, top + 112, half, 20).build()).active = manager.canRecord();
+        addRenderableWidget(Button.builder(tr("walls", state(book.throughWalls())), b -> {
+            book.setThroughWalls(!book.throughWalls()); manager.save(); b.setMessage(tr("walls", state(book.throughWalls())));
+        }).bounds(left + right, top + 112, half, 20).build()).active = manager.canRecord();
+        snapshot = button(tr("snapshot"), 10, 138, half, () -> minecraft.gui.setScreen(new SnapshotScreen(this, manager)));
+        snapshot.setTooltip(Tooltip.create(tr("snapshot_limit")));
+        button(tr("saved_title"), right, 138, half, () -> minecraft.gui.setScreen(new SavedTrailsScreen(this, manager)));
+        button(tr("mode", tr(book.temporary().enabled() ? "temporary" : "persistent")), 10, 164, panelWidth - 20,
+                () -> minecraft.gui.setScreen(new TemporaryScreen(this, manager))).active = manager.canRecord();
+        button(Component.translatable("gui.done"), 10, 206, panelWidth - 20, this::onClose);
         tick();
     }
     private static Component state(boolean on) { return Component.translatable(on ? "options.on" : "options.off"); }
-    @Override public boolean isPauseScreen() { return false; }
     @Override public void onClose() { manager.save(); minecraft.gui.setScreen(null); }
     @Override public void tick() {
-        if (manager.book() == null) { onClose(); return; }
-        record.setMessage(tr(manager.book().recording() ? "stop" : "start"));
-        record.active = manager.canRecord(); radius.active = manager.canRecord() && !manager.book().recording();
-        clear.active = manager.canRecord() && (manager.book().size() > 0 || manager.book().recording());
+        super.tick();
+        if (manager.book() != book) return;
+        record.setMessage(tr(book.recording() ? "stop" : "start"));
+        record.active = manager.canRecord(); radius.active = manager.canRecord() && !book.recording();
+        clear.active = manager.canRecord() && (book.size() > 0 || book.recording());
+        snapshot.active = manager.canRecord() && book.canSnapshot();
     }
-    @Override public void extractBackground(GuiGraphicsExtractor graphics, int x, int y, float delta) {
-        super.extractBackground(graphics, x, y, delta);
-        graphics.fill(left, top, left + panelWidth, top + 224, 0xEC20242C);
-        graphics.outline(left, top, panelWidth, 224, 0xFFFFB74D);
-    }
-    @Override public void extractRenderState(GuiGraphicsExtractor graphics, int x, int y, float delta) {
-        super.extractRenderState(graphics, x, y, delta);
-        var book = manager.book(); if (book == null) return;
-        graphics.centeredText(font, title, width / 2, top + 8, 0xFFFFB74D);
+    @Override public void extractRenderState(GuiGraphicsExtractor g, int x, int y, float delta) {
+        super.extractRenderState(g, x, y, delta);
         String status = manager.error() != null ? manager.error() : book.limitReached() ? "limit" : book.recording() ? "recording" : "idle";
-        graphics.centeredText(font, tr(status), width / 2, top + 26, book.recording() ? 0xFF8EE59B : 0xFFE2E6ED);
-        graphics.centeredText(font, tr("count", book.size(), TrailBook.MAX_MARKS), width / 2, top + 42, 0xFFBDC9D9);
-        for (int i = 0; i < 4; i++) graphics.text(font, tr("hint" + i), left + 10, top + 141 + i * 12, 0xFFBDC9D9);
+        g.centeredText(font, tr(status), width / 2, top + 26, book.recording() ? 0xFF8EE59B : 0xFFE2E6ED);
+        g.centeredText(font, tr("count", book.size(), TrailBook.MAX_MARKS), width / 2, top + 42, 0xFFBDC9D9);
+        g.centeredText(font, tr("main_hint"), width / 2, top + 190, 0xFFBDC9D9);
     }
 }

@@ -38,6 +38,7 @@ public final class TrailBookTest {
         try { TrailBook.restore(new TrailBook.Data(1, 64, true, true, List.of(new TrailBook.Mark(pos(0,0,0), 0)))); }
         catch (IllegalArgumentException expected) { failed = true; }
         check(failed, "Invalid marks rejected");
+        TrailFeaturesTest.run();
         System.out.println("TrailBookTest: all checks passed");
     }
 }

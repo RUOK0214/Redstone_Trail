@@ -45,8 +45,15 @@ public final class TrailManager {
         ticks++;
         if (level != mc.level) {
             if (book() != null) book().stop();
+            if (book() != null && book().temporary().enabled()) book().clear();
             save(); knownStates.clear(); level = mc.level;
             session = level == null ? null : sessions.computeIfAbsent(identity(mc), Session::new);
+        }
+        if (book() != null) {
+            book().expire();
+            // Once visible state agrees with the server baseline, the world itself is a safe baseline.
+            // Keep only unresolved predictions; temporary trails can otherwise grow this cache forever.
+            knownStates.entrySet().removeIf(entry -> !level.hasChunkAt(entry.getKey()) || level.getBlockState(entry.getKey()) == entry.getValue());
         }
         if (ticks % 100 == 0) saveAll();
     }
@@ -59,7 +66,7 @@ public final class TrailManager {
     }
     public void stop() {
         if (book() == null) return;
-        book().stop(); knownStates.clear(); save(); message("stopped");
+        book().stop(); knownStates.clear(); save(); message(book().temporary().enabled() ? "stopped_temporary" : "stopped");
     }
     public void clear() {
         if (book() == null || session.readFailed) return;

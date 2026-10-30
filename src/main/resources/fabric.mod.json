@@ -3,7 +3,7 @@
   "id": "redstone_trail",
   "version": "${version}",
   "name": "Redstone Trail",
-  "description": "Start recording, trigger a circuit, and keep outlines of changed blocks until cleared. Open /redstonetrail or /rt. Client-only for Minecraft 26.2; trails are saved per world.",
+  "description": "Record block-change trails with editable color, width and transparency. Save multiple comparisons with show/hide/delete controls, or let current marks expire with three timed fade modes. Open /rt. Client-only for Minecraft 26.2; saved comparisons persist per world.",
   "authors": ["RUOK0214"],
   "license": "MIT",
   "environment": "client",
