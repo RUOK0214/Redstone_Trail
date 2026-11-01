@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "redstone_trail_test",
+  "version": "1.0.0",
+  "name": "Redstone Trail integration tests",
+  "environment": "client",
+  "entrypoints": { "fabric-client-gametest": ["io.github.ruok0214.redstonetrail.TrailClientGameTest"] }
+}
